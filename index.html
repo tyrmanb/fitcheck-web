@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FitCheck — Prueba tu outfit con IA</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff}
+  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 50%,#0a0a0a 100%)}
+  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 16px;font-size:13px;color:#ccc;margin-bottom:24px}
+  .badge span{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
+  h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:1.5rem}
+  .subtitle{font-size:clamp(1rem,2vw,1.25rem);color:#888;max-width:560px;line-height:1.7;margin-bottom:2.5rem}
+  .cta-group{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+  .btn-primary{background:#fff;color:#000;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none}
+  .btn-secondary{background:transparent;color:#fff;padding:14px 28px;border-radius:8px;font-weight:500;font-size:15px;border:1px solid rgba(255,255,255,0.3);text-decoration:none}
+  .section{padding:6rem 2rem;max-width:1100px;margin:0 auto}
+  .section-label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#666;margin-bottom:12px}
+  .section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;margin-bottom:1rem;line-height:1.2}
+  .section-sub{color:#777;font-size:1.05rem;line-height:1.7;max-width:520px}
+  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-top:3rem}
+  .step{background:#111;border:1px solid #222;border-radius:16px;padding:24px}
+  .step-num{width:36px;height:36px;background:#fff;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:16px}
+  .step h3{font-size:15px;font-weight:600;margin-bottom:8px}
+  .step p{font-size:13px;color:#777;line-height:1.6}
+  .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:3rem}
+  .feature{background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:20px}
+  .feature-icon{font-size:24px;margin-bottom:12px}
+  .feature h3{font-size:14px;font-weight:600;margin-bottom:6px}
+  .feature p{font-size:13px;color:#666;line-height:1.5}
+  .pricing{background:#111;border:1px solid #222;border-radius:24px;padding:3rem;text-align:center;max-width:480px;margin:3rem auto 0}
+  .price{font-size:3rem;font-weight:700;margin:1rem 0}
+  .price span{font-size:1rem;color:#777;font-weight:400}
+  .price-list{list-style:none;text-align:left;margin:1.5rem 0 2rem}
+  .price-list li{padding:8px 0;border-bottom:1px solid #1f1f1f;font-size:14px;color:#ccc}
+  .price-list li::before{content:"✓  ";color:#22c55e}
+  footer{border-top:1px solid #1a1a1a;padding:2rem;text-align:center;color:#444;font-size:13px}
+  footer a{color:#555;text-decoration:none}
+</style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="badge"><span></span> Disponible ahora en beta</div>
+  <h1>Prueba cualquier prenda<br>antes de comprarla</h1>
+  <p class="subtitle">Sube una foto tuya y una imagen de la prenda. La IA genera una visualización de cómo te quedaría — en segundos.</p>
+  <div class="cta-group">
+    <a href="#pricing" class="btn-primary">Empezar gratis</a>
+    <a href="#how" class="btn-secondary">Cómo funciona</a>
+  </div>
+</section>
+
+<div style="background:#0a0a0a">
+  <section class="section" id="how">
+    <div class="section-label">Proceso</div>
+    <h2 class="section-title">Tres pasos, un resultado perfecto</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><h3>Sube tu foto</h3><p>Una selfie o foto de cuerpo completo. Mejor con cuerpo completo para mayor precisión.</p></div>
+      <div class="step"><div class="step-num">2</div><h3>Elige la prenda</h3><p>Foto de cualquier prenda — camisa, pantalón, vestido, accesorio — desde cualquier tienda.</p></div>
+      <div class="step"><div class="step-num">3</div><h3>Elige el ambiente</h3><p>Oficina, casual, playa, fiesta. La IA genera la escena completa con tu estilo.</p></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="section-label">Tecnología</div>
+    <h2 class="section-title">IA de última generación</h2>
+    <p class="section-sub">FitCheck usa los modelos más avanzados para análisis de moda, generación de imagen y composición facial.</p>
+    <div class="features">
+      <div class="feature"><div class="feature-icon">👤</div><h3>Tu rostro real</h3><p>Face-swap de alta fidelidad para que el resultado seas tú, no un modelo genérico.</p></div>
+      <div class="feature"><div class="feature-icon">👗</div><h3>Análisis de prenda</h3><p>IA especializada en moda identifica tipo, color y estilo de cada prenda con precisión.</p></div>
+      <div class="feature"><div class="feature-icon">⚡</div><h3>Resultado en 10 segundos</h3><p>Pipeline optimizado con múltiples proveedores para velocidad y calidad máxima.</p></div>
+      <div class="feature"><div class="feature-icon">🌍</div><h3>Cualquier ambiente</h3><p>8 ambientes disponibles: oficina, gimnasio, casa, campo, playa, fiesta, ciudad y más.</p></div>
+    </div>
+  </section>
+
+  <section class="section" id="pricing">
+    <div class="section-label" style="text-align:center">Precio</div>
+    <h2 class="section-title" style="text-align:center">Simple y transparente</h2>
+    <div class="pricing">
+      <div style="font-size:14px;color:#666;margin-bottom:8px">Plan Pro</div>
+      <div class="price">$9.99 <span>/ mes</span></div>
+      <ul class="price-list">
+        <li>Análisis ilimitados de outfits</li>
+        <li>Face-swap con tu rostro real</li>
+        <li>8 ambientes disponibles</li>
+        <li>Imágenes en alta definición</li>
+        <li>Historial de visualizaciones</li>
+        <li>Soporte prioritario</li>
+      </ul>
+      <a href="#" class="btn-primary" style="display:block;text-align:center;padding:16px">Comenzar ahora</a>
+      <p style="font-size:12px;color:#555;margin-top:12px">30 análisis gratis al registrarte. Sin tarjeta requerida.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2026 FitCheck · <a href="mailto:hello@fitcheck.art">hello@fitcheck.art</a> · <a href="#">Privacidad</a> · <a href="#">Términos</a></p>
+  </footer>
+</div>
+
+</body>
+</html>
