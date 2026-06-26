@@ -3,101 +3,190 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FitCheck — Prueba tu outfit con IA</title>
+<title>FitCheck — Visualiza tu outfit con IA</title>
+<meta name="description" content="Sube una selfie y la foto de cualquier prenda. FitCheck genera una visualización editorial de cómo te verías — en segundos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap">
 <style>
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0a0a0a;color:#fff}
-  .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:2rem;background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 50%,#0a0a0a 100%)}
-  .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:20px;padding:6px 16px;font-size:13px;color:#ccc;margin-bottom:24px}
-  .badge span{width:8px;height:8px;border-radius:50%;background:#22c55e;display:inline-block}
-  h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:700;line-height:1.1;margin-bottom:1.5rem}
-  .subtitle{font-size:clamp(1rem,2vw,1.25rem);color:#888;max-width:560px;line-height:1.7;margin-bottom:2.5rem}
-  .cta-group{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-  .btn-primary{background:#fff;color:#000;padding:14px 28px;border-radius:8px;font-weight:600;font-size:15px;text-decoration:none}
-  .btn-secondary{background:transparent;color:#fff;padding:14px 28px;border-radius:8px;font-weight:500;font-size:15px;border:1px solid rgba(255,255,255,0.3);text-decoration:none}
-  .section{padding:6rem 2rem;max-width:1100px;margin:0 auto}
-  .section-label{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:#666;margin-bottom:12px}
-  .section-title{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:600;margin-bottom:1rem;line-height:1.2}
-  .section-sub{color:#777;font-size:1.05rem;line-height:1.7;max-width:520px}
-  .steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:24px;margin-top:3rem}
-  .step{background:#111;border:1px solid #222;border-radius:16px;padding:24px}
-  .step-num{width:36px;height:36px;background:#fff;color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;margin-bottom:16px}
-  .step h3{font-size:15px;font-weight:600;margin-bottom:8px}
-  .step p{font-size:13px;color:#777;line-height:1.6}
-  .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:3rem}
-  .feature{background:#111;border:1px solid #1f1f1f;border-radius:12px;padding:20px}
-  .feature-icon{font-size:24px;margin-bottom:12px}
-  .feature h3{font-size:14px;font-weight:600;margin-bottom:6px}
-  .feature p{font-size:13px;color:#666;line-height:1.5}
-  .pricing{background:#111;border:1px solid #222;border-radius:24px;padding:3rem;text-align:center;max-width:480px;margin:3rem auto 0}
-  .price{font-size:3rem;font-weight:700;margin:1rem 0}
-  .price span{font-size:1rem;color:#777;font-weight:400}
-  .price-list{list-style:none;text-align:left;margin:1.5rem 0 2rem}
-  .price-list li{padding:8px 0;border-bottom:1px solid #1f1f1f;font-size:14px;color:#ccc}
-  .price-list li::before{content:"✓  ";color:#22c55e}
-  footer{border-top:1px solid #1a1a1a;padding:2rem;text-align:center;color:#444;font-size:13px}
-  footer a{color:#555;text-decoration:none}
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #000;
+    --surface: #0a0a0a;
+    --surface-2: #111;
+    --border: #1a1a1a;
+    --border-2: #333;
+    --text: #fff;
+    --text-2: #888;
+    --text-3: #555;
+    --accent: #b8f400;
+    --radius: 8px;
+    --font: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+  html { scroll-behavior: smooth; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 32px; height: 64px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(12px);
+  }
+  .nav-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+  .nav-logo { font-size: 18px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+  .nav-name { font-size: 15px; font-weight: 500; color: var(--text); }
+  .nav-links { display: flex; align-items: center; gap: 8px; }
+  .btn-nav { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; text-decoration: none; transition: all 0.15s ease; white-space: nowrap; }
+  .btn-nav-ghost { color: var(--text-2); border: 1px solid var(--border-2); background: transparent; }
+  .btn-nav-ghost:hover { color: var(--text); border-color: #555; }
+  .btn-nav-fill { color: #000; background: var(--text); border: 1px solid var(--text); }
+  .btn-nav-fill:hover { background: #e5e5e5; }
+  .hero { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 100px 24px 80px; }
+  .hero-badge { display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--border-2); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--text-2); letter-spacing: 0.05em; margin-bottom: 48px; }
+  .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero-title { font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 700; line-height: 1.05; letter-spacing: -0.03em; margin-bottom: 28px; max-width: 820px; }
+  .hero-title em { font-style: italic; color: var(--text-2); font-weight: 300; }
+  .hero-sub { font-size: clamp(1rem, 2vw, 1.2rem); color: var(--text-2); max-width: 480px; line-height: 1.7; margin-bottom: 48px; font-weight: 400; }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  .btn-primary { display: inline-flex; align-items: center; gap: 8px; background: var(--text); color: #000; padding: 14px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.15s ease; border: 1px solid var(--text); }
+  .btn-primary:hover { background: #e5e5e5; }
+  .btn-secondary { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--text); padding: 14px 28px; border-radius: 8px; font-weight: 500; font-size: 14px; text-decoration: none; transition: all 0.15s ease; border: 1px solid var(--border-2); }
+  .btn-secondary:hover { border-color: #555; }
+  .hero-note { margin-top: 20px; font-size: 12px; color: var(--text-3); }
+  .divider { border: none; border-top: 1px solid var(--border); }
+  .section { padding: 96px 24px; max-width: 1100px; margin: 0 auto; }
+  .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); margin-bottom: 16px; font-weight: 500; }
+  .section-title { font-size: clamp(1.8rem, 4vw, 3rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 16px; }
+  .section-sub { color: var(--text-2); font-size: 1rem; line-height: 1.75; max-width: 520px; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1px; margin-top: 56px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .step { background: var(--bg); padding: 32px 28px; }
+  .step-num { font-size: 11px; font-weight: 600; color: var(--text-3); letter-spacing: 0.1em; margin-bottom: 20px; }
+  .step h3 { font-size: 15px; font-weight: 600; margin-bottom: 10px; }
+  .step p { font-size: 13px; color: var(--text-2); line-height: 1.7; }
+  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; margin-top: 56px; background: var(--border); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .feature { background: var(--bg); padding: 28px; transition: background 0.15s; }
+  .feature:hover { background: var(--surface-2); }
+  .feature-tag { font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent); font-weight: 600; margin-bottom: 14px; }
+  .feature h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; }
+  .feature p { font-size: 13px; color: var(--text-2); line-height: 1.65; }
+  .pricing-wrap { display: flex; justify-content: center; margin-top: 56px; }
+  .pricing-card { border: 1px solid var(--border-2); border-radius: 12px; padding: 40px; max-width: 420px; width: 100%; background: var(--surface); }
+  .pricing-plan { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-3); font-weight: 600; margin-bottom: 8px; }
+  .pricing-price { font-size: 3.5rem; font-weight: 700; letter-spacing: -0.03em; margin-bottom: 4px; }
+  .pricing-price span { font-size: 1rem; color: var(--text-2); font-weight: 400; }
+  .pricing-note { font-size: 13px; color: var(--text-3); margin-bottom: 32px; }
+  .pricing-list { list-style: none; margin-bottom: 32px; }
+  .pricing-list li { display: flex; align-items: flex-start; gap: 10px; padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text-2); }
+  .pricing-list li:last-child { border-bottom: none; }
+  .pricing-list li::before { content: "✓"; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+  .btn-full { display: block; text-align: center; width: 100%; padding: 14px; border-radius: 8px; font-weight: 600; font-size: 14px; text-decoration: none; background: var(--text); color: #000; transition: background 0.15s; }
+  .btn-full:hover { background: #e5e5e5; }
+  .pricing-trial { font-size: 12px; color: var(--text-3); text-align: center; margin-top: 16px; }
+  .editorial { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); padding: 48px 24px; text-align: center; background: var(--surface); }
+  .editorial-title { font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 600; letter-spacing: -0.02em; margin-bottom: 12px; }
+  .editorial-sub { font-size: 14px; color: var(--text-2); }
+  .editorial-tags { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 24px; }
+  .editorial-tag { border: 1px solid var(--border-2); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--text-2); }
+  footer { border-top: 1px solid var(--border); padding: 32px 24px; }
+  .footer-inner { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+  .footer-brand { font-size: 14px; font-weight: 600; color: var(--text-2); }
+  .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+  .footer-links a { font-size: 13px; color: var(--text-3); text-decoration: none; transition: color 0.15s; }
+  .footer-links a:hover { color: var(--text-2); }
+  @media (max-width: 640px) { nav { padding: 0 20px; } .nav-name { display: none; } .hero-title { font-size: 2.5rem; } .footer-inner { flex-direction: column; align-items: flex-start; } }
 </style>
 </head>
 <body>
-
-<section class="hero">
-  <div class="badge"><span></span> Disponible ahora en beta</div>
-  <h1>Prueba cualquier prenda<br>antes de comprarla</h1>
-  <p class="subtitle">Sube una foto tuya y una imagen de la prenda. La IA genera una visualización de cómo te quedaría — en segundos.</p>
-  <div class="cta-group">
-    <a href="#pricing" class="btn-primary">Empezar gratis</a>
-    <a href="#how" class="btn-secondary">Cómo funciona</a>
+<nav>
+  <a href="/" class="nav-brand">
+    <span class="nav-logo">FC</span>
+    <span class="nav-name">FitCheck</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how" class="btn-nav btn-nav-ghost">Cómo funciona</a>
+    <a href="#pricing" class="btn-nav btn-nav-fill">Descargar gratis</a>
   </div>
+</nav>
+<section class="hero">
+  <div class="hero-badge"><span class="hero-badge-dot"></span> Beta disponible · iOS &amp; Android</div>
+  <h1 class="hero-title">Tu próximo outfit.<br><em>Ya existe.</em></h1>
+  <p class="hero-sub">Sube una selfie y la foto de cualquier prenda. FitCheck genera una visualización editorial de cómo te verías — en segundos.</p>
+  <div class="hero-cta">
+    <a href="#pricing" class="btn-primary">Probar gratis</a>
+    <a href="#how" class="btn-secondary">Cómo funciona →</a>
+  </div>
+  <p class="hero-note">1 prueba gratuita · Sin tarjeta requerida</p>
 </section>
-
-<div style="background:#0a0a0a">
-  <section class="section" id="how">
+<hr class="divider">
+<div id="how" style="background: var(--bg);">
+  <div class="section">
     <div class="section-label">Proceso</div>
-    <h2 class="section-title">Tres pasos, un resultado perfecto</h2>
+    <h2 class="section-title">Tres pasos.<br>Un resultado perfecto.</h2>
     <div class="steps">
-      <div class="step"><div class="step-num">1</div><h3>Sube tu foto</h3><p>Una selfie o foto de cuerpo completo. Mejor con cuerpo completo para mayor precisión.</p></div>
-      <div class="step"><div class="step-num">2</div><h3>Elige la prenda</h3><p>Foto de cualquier prenda — camisa, pantalón, vestido, accesorio — desde cualquier tienda.</p></div>
-      <div class="step"><div class="step-num">3</div><h3>Elige el ambiente</h3><p>Oficina, casual, playa, fiesta. La IA genera la escena completa con tu estilo.</p></div>
+      <div class="step"><div class="step-num">01</div><h3>Sube tu foto</h3><p>Una selfie o foto de cuerpo completo. Cuerpo completo da mayor precisión en el resultado.</p></div>
+      <div class="step"><div class="step-num">02</div><h3>Elige la prenda</h3><p>Foto de cualquier prenda o accesorio — desde cualquier tienda, red social o catálogo.</p></div>
+      <div class="step"><div class="step-num">03</div><h3>Elige el ambiente</h3><p>Oficina, casual, playa, fiesta. La IA genera la escena completa con dirección editorial.</p></div>
     </div>
-  </section>
-
-  <section class="section">
-    <div class="section-label">Tecnología</div>
-    <h2 class="section-title">IA de última generación</h2>
-    <p class="section-sub">FitCheck usa los modelos más avanzados para análisis de moda, generación de imagen y composición facial.</p>
-    <div class="features">
-      <div class="feature"><div class="feature-icon">👤</div><h3>Tu rostro real</h3><p>Face-swap de alta fidelidad para que el resultado seas tú, no un modelo genérico.</p></div>
-      <div class="feature"><div class="feature-icon">👗</div><h3>Análisis de prenda</h3><p>IA especializada en moda identifica tipo, color y estilo de cada prenda con precisión.</p></div>
-      <div class="feature"><div class="feature-icon">⚡</div><h3>Resultado en 10 segundos</h3><p>Pipeline optimizado con múltiples proveedores para velocidad y calidad máxima.</p></div>
-      <div class="feature"><div class="feature-icon">🌍</div><h3>Cualquier ambiente</h3><p>8 ambientes disponibles: oficina, gimnasio, casa, campo, playa, fiesta, ciudad y más.</p></div>
-    </div>
-  </section>
-
-  <section class="section" id="pricing">
-    <div class="section-label" style="text-align:center">Precio</div>
-    <h2 class="section-title" style="text-align:center">Simple y transparente</h2>
-    <div class="pricing">
-      <div style="font-size:14px;color:#666;margin-bottom:8px">Plan Pro</div>
-      <div class="price">$9.99 <span>/ mes</span></div>
-      <ul class="price-list">
-        <li>Análisis ilimitados de outfits</li>
-        <li>Face-swap con tu rostro real</li>
-        <li>8 ambientes disponibles</li>
-        <li>Imágenes en alta definición</li>
-        <li>Historial de visualizaciones</li>
-        <li>Soporte prioritario</li>
-      </ul>
-      <a href="#" class="btn-primary" style="display:block;text-align:center;padding:16px">Comenzar ahora</a>
-      <p style="font-size:12px;color:#555;margin-top:12px">30 análisis gratis al registrarte. Sin tarjeta requerida.</p>
-    </div>
-  </section>
-
-  <footer>
-    <p>© 2026 FitCheck · <a href="mailto:hello@fitcheck.art">hello@fitcheck.art</a> · <a href="/privacidad">Privacidad</a> · <a href="/terminos">Términos</a></p>
-  </footer>
+  </div>
 </div>
-
+<div class="editorial">
+  <p class="editorial-title">Dirección editorial de las mejores revistas del mundo.</p>
+  <p class="editorial-sub">Cada imagen generada sigue la estética visual de las publicaciones más influyentes.</p>
+  <div class="editorial-tags">
+    <span class="editorial-tag">Vogue</span>
+    <span class="editorial-tag">ELLE</span>
+    <span class="editorial-tag">Cosmopolitan</span>
+    <span class="editorial-tag">GQ</span>
+    <span class="editorial-tag">Esquire</span>
+    <span class="editorial-tag">Harper's Bazaar</span>
+  </div>
+</div>
+<div style="background: var(--bg);">
+  <div class="section">
+    <div class="section-label">Tecnología</div>
+    <h2 class="section-title">IA de última generación.</h2>
+    <p class="section-sub">Modelos especializados en moda, generación de imagen y composición facial trabajando en conjunto.</p>
+    <div class="features">
+      <div class="feature"><div class="feature-tag">Identidad</div><h3>Tu rostro real</h3><p>Face-swap de alta fidelidad. El resultado eres tú, no un modelo genérico.</p></div>
+      <div class="feature"><div class="feature-tag">Análisis</div><h3>Lectura de prenda</h3><p>IA especializada en moda identifica tipo, color, material y estilo con precisión editorial.</p></div>
+      <div class="feature"><div class="feature-tag">Velocidad</div><h3>Resultado en segundos</h3><p>Pipeline optimizado con múltiples proveedores de IA para máxima calidad y velocidad.</p></div>
+      <div class="feature"><div class="feature-tag">Personalización</div><h3>Tu silueta, tu estilo</h3><p>FitCheck aprende tu silueta y zonas favoritas para potenciar cada visualización.</p></div>
+    </div>
+  </div>
+</div>
+<hr class="divider">
+<div id="pricing" style="background: var(--bg);">
+  <div class="section" style="text-align: center;">
+    <div class="section-label">Precio</div>
+    <h2 class="section-title">Simple y transparente.</h2>
+    <div class="pricing-wrap">
+      <div class="pricing-card">
+        <div class="pricing-plan">FitCheck Pro</div>
+        <div class="pricing-price">$9.99 <span>/ mes</span></div>
+        <p class="pricing-note">Cancela cuando quieras.</p>
+        <ul class="pricing-list">
+          <li>Análisis ilimitados de outfits</li>
+          <li>Tu rostro real en cada imagen</li>
+          <li>8 ambientes disponibles</li>
+          <li>Imágenes en alta definición</li>
+          <li>Historial de visualizaciones</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <a href="#" class="btn-full">Comenzar ahora</a>
+        <p class="pricing-trial">1 prueba gratis al registrarte · Sin tarjeta requerida</p>
+      </div>
+    </div>
+  </div>
+</div>
+<footer>
+  <div class="footer-inner">
+    <span class="footer-brand">© 2026 FitCheck</span>
+    <div class="footer-links">
+      <a href="mailto:hello@fitcheck.art">hello@fitcheck.art</a>
+      <a href="/privacidad">Privacidad</a>
+      <a href="/terminos">Términos</a>
+    </div>
+  </div>
+</footer>
 </body>
 </html>
-
