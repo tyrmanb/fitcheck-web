@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FitCheck — Admin</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0a0a;--card:#141414;--card2:#1c1c1c;--border:#242424;--accent:#b8f400;--accent2:#9dd600;--text:#f0f0f0;--muted:#666;--muted2:#444;--success:#4ade80;--danger:#f87171;--warn:#fbbf24;--info:#60a5fa}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh;font-size:14px}
+/* ── Login ── */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.login-box{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:40px 36px;width:100%;max-width:400px}
+.login-logo{font-size:22px;font-weight:900;color:var(--accent);letter-spacing:-1px;margin-bottom:6px}
+.login-sub{color:var(--muted);font-size:13px;margin-bottom:32px}
+.field{margin-bottom:18px}
+label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:7px}
+input[type=email],input[type=password],input[type=text],textarea{width:100%;background:#0f0f0f;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;color:var(--text);font-size:14px;outline:none;transition:border .2s;font-family:inherit}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{resize:vertical;min-height:100px;line-height:1.6}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:11px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;border:none;transition:opacity .15s,transform .1s;letter-spacing:.2px}
+.btn:hover{opacity:.88}.btn:active{transform:scale(.98)}
+.btn-primary{background:var(--accent);color:#0a0a0a;width:100%;padding:14px;font-size:15px}
+.btn-approve{background:var(--success);color:#0a0a0a;font-size:12px;padding:6px 13px}
+.btn-reject{background:var(--danger);color:#fff;font-size:12px;padding:6px 13px}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:12px;padding:7px 14px}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-accent-outline{background:transparent;border:1.5px solid var(--accent);color:var(--accent);font-size:13px;padding:9px 18px}
+.btn-sm{font-size:11px;padding:5px 11px}
+.login-err{color:var(--danger);font-size:13px;margin-top:10px;display:none}
+/* ── App shell ── */
+#app{display:none;height:100vh;overflow:hidden;flex-direction:row}
+#app.shown{display:flex}
+/* ── Sidebar ── */
+.sidebar{width:220px;min-width:220px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0;overflow-y:auto}
+.sidebar-logo{padding:22px 20px 18px;border-bottom:1px solid var(--border)}
+.sidebar-logo-fc{font-size:20px;font-weight:900;color:var(--accent);letter-spacing:-1px}
+.sidebar-logo-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sidebar-nav{padding:12px 8px;flex:1}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;user-select:none}
+.nav-item:hover{background:var(--card2);color:var(--text)}
+.nav-item.active{background:var(--accent);color:#0a0a0a;font-weight:700}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border)}
+.sidebar-logout{font-size:12px;color:var(--muted);cursor:pointer;transition:color .15s}
+.sidebar-logout:hover{color:var(--danger)}
+/* ── Main ── */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:17px;font-weight:700;color:var(--text)}
+.topbar-actions{display:flex;gap:8px}
+.content{flex:1;overflow-y:auto;padding:24px}
+/* ── Stats grid ── */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:26px}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 16px}
+.stat-n{font-size:30px;font-weight:800;color:var(--accent);line-height:1.1}
+.stat-l{font-size:11px;color:var(--muted);margin-top:5px;text-transform:uppercase;letter-spacing:.7px}
+.stat-card.warn .stat-n{color:var(--warn)}
+.stat-card.success .stat-n{color:var(--success)}
+/* ── Suggestions ── */
+.tabs{display:flex;gap:6px;margin-bottom:18px;flex-wrap:wrap}
+.tab{padding:7px 16px;border-radius:8px;background:var(--card);border:1.5px solid var(--border);cursor:pointer;font-size:12px;font-weight:600;color:var(--muted);transition:all .15s}
+.tab:hover{border-color:var(--accent);color:var(--accent)}
+.tab.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent)}
+.badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+.badge-pending{background:rgba(251,191,36,.15);color:var(--warn)}
+.badge-responded{background:rgba(74,222,128,.15);color:var(--success)}
+.badge-approved{background:rgba(74,222,128,.15);color:var(--success)}
+.badge-rejected{background:rgba(248,113,113,.15);color:var(--danger)}
+.badge-read{background:rgba(96,165,250,.15);color:var(--info)}
+.badge-idea{background:rgba(200,240,77,.12);color:#c8f04d}
+.badge-bug{background:rgba(248,113,113,.12);color:#f87171}
+.badge-compliment{background:rgba(74,222,128,.12);color:#4ade80}
+.badge-general{background:rgba(136,136,136,.12);color:#999}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.sg-row{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.sg-row:last-child{border-bottom:none}
+.sg-row:hover{background:var(--card2)}
+.sg-row.selected{background:rgba(184,244,0,.06);border-left:3px solid var(--accent)}
+.sg-meta{min-width:0;flex:1}
+.sg-email{font-size:12px;color:var(--accent);margin-bottom:3px;font-weight:600}
+.sg-preview{font-size:13px;color:var(--text);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.sg-date{font-size:11px;color:var(--muted);margin-top:4px}
+.sg-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+/* ── Detail panel ── */
+.detail-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:22px;margin-top:20px;display:none}
+.detail-panel.shown{display:block}
+.detail-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;gap:12px}
+.detail-user{font-size:13px;color:var(--muted)}
+.detail-user strong{color:var(--text);font-size:14px}
+.detail-msg{background:#0f0f0f;border:1px solid var(--border);border-radius:10px;padding:14px;font-size:14px;color:var(--text);line-height:1.7;margin-bottom:16px;white-space:pre-wrap}
+.detail-ai{background:var(--card2);border-radius:8px;padding:10px 13px;font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6}
+.detail-ai strong{color:var(--text)}
+.reply-label{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:7px}
+/* ── Users table ── */
+table{width:100%;border-collapse:collapse}
+.table-wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+th{background:#0f0f0f;padding:10px 16px;text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border)}
+td{padding:12px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:rgba(255,255,255,.025)}
+.user-name{font-weight:600;color:var(--text)}
+.user-email{font-size:11px;color:var(--muted);margin-top:2px}
+.usage-bar-wrap{height:5px;background:var(--border);border-radius:3px;width:80px;margin-top:4px}
+.usage-bar{height:100%;border-radius:3px;background:var(--accent)}
+/* ── Section visibility ── */
+.section{display:none}.section.active{display:block}
+/* ── Empty / toast ── */
+.empty{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-icon{font-size:36px;margin-bottom:10px}
+.toast{position:fixed;bottom:24px;right:24px;background:#1c1c1c;border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:999;max-width:320px}
+.toast.show{opacity:1}
+.toast.ok{border-left:3px solid var(--success);color:var(--success)}
+.toast.err{border-left:3px solid var(--danger);color:var(--danger)}
+.toast.info{border-left:3px solid var(--accent);color:var(--accent)}
+/* ── Spinner ── */
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── Responsive ── */
+@media(max-width:700px){
+  .sidebar{width:60px;min-width:60px}
+  .sidebar-logo-sub,.nav-label,.sidebar-footer{display:none}
+  .nav-icon{width:100%;text-align:center}
+  .content{padding:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ LOGIN ═══ -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">FC FitCheck</div>
+    <div class="login-sub">Panel de Administración</div>
+    <div class="field">
+      <label>Correo electrónico</label>
+      <input type="email" id="le" placeholder="admin@fitcheck.art" onkeydown="if(event.key==='Enter')document.getElementById('lp').focus()">
+    </div>
+    <div class="field">
+      <label>Contraseña</label>
+      <input type="password" id="lp" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn btn-primary" onclick="login()" id="login-btn">Ingresar</button>
+    <div class="login-err" id="login-err">Credenciales incorrectas. Intenta de nuevo.</div>
+  </div>
+</div>
+
+<!-- ═══ APP ═══ -->
+<div id="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-fc">FC</div>
+      <div class="sidebar-logo-sub">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-item active" onclick="nav('dashboard')" id="nav-dashboard">
+        <span class="nav-icon">◈</span><span class="nav-label">Dashboard</span>
+      </div>
+      <div class="nav-item" onclick="nav('suggestions')" id="nav-suggestions">
+        <span class="nav-icon">💬</span><span class="nav-label">Sugerencias</span>
+      </div>
+      <div class="nav-item" onclick="nav('users')" id="nav-users">
+        <span class="nav-icon">👥</span><span class="nav-label">Usuarios</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-logout" onclick="logout()">← Cerrar sesión</div>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="btn btn-outline" onclick="sendSummary()">📊 Resumen</button>
+        <button class="btn btn-outline" onclick="sendWeekly()">📈 Semanal</button>
+        <button class="btn btn-outline" onclick="refreshAll()">↻</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── DASHBOARD ── -->
+      <div class="section active" id="sec-dashboard">
+        <div class="stats" id="stats-row">
+          <div class="stat-card"><div class="stat-n" id="st-total">—</div><div class="stat-l">Usuarios Trial</div></div>
+          <div class="stat-card success"><div class="stat-n" id="st-active">—</div><div class="stat-l">Activos</div></div>
+          <div class="stat-card warn"><div class="stat-n" id="st-pending">—</div><div class="stat-l">Pendientes</div></div>
+          <div class="stat-card"><div class="stat-n" id="st-sg-pending">—</div><div class="stat-l">Sug. sin leer</div></div>
+        </div>
+        <div class="card" id="recent-activity">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px">Actividad reciente</div>
+          <div id="recent-list"><div class="empty"><div class="spin"></div></div></div>
+        </div>
+      </div>
+
+      <!-- ── SUGERENCIAS ── -->
+      <div class="section" id="sec-suggestions">
+        <div class="tabs">
+          <div class="tab active" onclick="sgTab('pending')" id="sgt-pending">⏳ Pendientes</div>
+          <div class="tab" onclick="sgTab('responded')" id="sgt-responded">✓ Respondidas</div>
+          <div class="tab" onclick="sgTab('')" id="sgt-all">Todas</div>
+        </div>
+        <div class="card" id="sg-list-card">
+          <div id="sg-list"><div class="empty"><div class="spin"></div></div></div>
+        </div>
+        <!-- Detail panel -->
+        <div class="detail-panel" id="sg-detail">
+          <div class="detail-header">
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--text)" id="dp-name">—</div>
+              <div class="detail-user" id="dp-email">—</div>
+              <div style="margin-top:6px;display:flex;gap:6px;flex-wrap:wrap" id="dp-badges"></div>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="closeDetail()">✕ Cerrar</button>
+          </div>
+          <div class="detail-msg" id="dp-msg"></div>
+          <div class="detail-ai" id="dp-ai" style="display:none"></div>
+          <div id="dp-response-section">
+            <div class="reply-label">Tu respuesta</div>
+            <textarea id="dp-reply" placeholder="Escribe una respuesta para enviar al usuario por email…" style="margin-top:7px;margin-bottom:12px"></textarea>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="btn btn-primary" style="width:auto;padding:10px 22px;font-size:13px" onclick="sendReply()">Responder y notificar</button>
+              <button class="btn btn-approve" onclick="approveSg()">✓ Aprobar (+5 análisis)</button>
+              <button class="btn btn-reject" onclick="rejectSg()">✗ Rechazar</button>
+            </div>
+          </div>
+          <div id="dp-replied" style="display:none;background:rgba(74,222,128,.08);border:1px solid rgba(74,222,128,.25);border-radius:10px;padding:12px 14px;font-size:13px;color:var(--success)">
+            ✓ Respuesta enviada al usuario.
+          </div>
+        </div>
+      </div>
+
+      <!-- ── USUARIOS ── -->
+      <div class="section" id="sec-users">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Usuario</th>
+                <th>País / Referencia</th>
+                <th>Uso</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="users-tbody"><tr><td colspan="5" style="text-align:center;padding:32px;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+</div><!-- /app -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API_URL = 'https://bbf18b23-0c73-421a-a5bb-0b43525e1660-00-4d9b0e9jm6qs.picard.replit.dev';
+
+let jwt = localStorage.getItem('fc_admin_jwt') || '';
+let allTrials = [];
+let allSuggestions = [];
+let currentSgTab = 'pending';
+let selectedSg = null;
+
+// ── Auth ──
+async function login() {
+  const email = document.getElementById('le').value.trim();
+  const pw = document.getElementById('lp').value;
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-err');
+  if (!email || !pw) return;
+  btn.innerHTML = '<span class="spin"></span> Verificando…';
+  btn.disabled = true;
+  err.style.display = 'none';
+  try {
+    const res = await api('/api/admin/login', 'POST', { email, password: pw }, false);
+    if (!res.ok || !res.data.token) { err.style.display = 'block'; return; }
+    jwt = res.data.token;
+    localStorage.setItem('fc_admin_jwt', jwt);
+    showApp();
+    refreshAll();
+  } catch { err.style.display = 'block'; }
+  finally { btn.textContent = 'Ingresar'; btn.disabled = false; }
+}
+
+function logout() {
+  jwt = ''; localStorage.removeItem('fc_admin_jwt');
+  document.getElementById('app').classList.remove('shown');
+  document.getElementById('login-page').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').classList.add('shown');
+}
+
+// ── API helper ──
+async function api(path, method='GET', body=null, auth=true) {
+  const headers = { 'Content-Type': 'application/json' };
+  if (auth) headers['Authorization'] = 'Bearer ' + jwt;
+  const opts = { method, headers };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(API_URL + path, opts);
+  if (res.status === 401 && auth) { logout(); throw new Error('Unauthorized'); }
+  const data = await res.json().catch(() => ({}));
+  return { ok: res.ok, status: res.status, data };
+}
+
+// ── Navigation ──
+function nav(section) {
+  ['dashboard','suggestions','users'].forEach(s => {
+    document.getElementById('sec-'+s).classList.toggle('active', s === section);
+    document.getElementById('nav-'+s).classList.toggle('active', s === section);
+  });
+  const titles = { dashboard: 'Dashboard', suggestions: 'Sugerencias', users: 'Usuarios Trial' };
+  document.getElementById('topbar-title').textContent = titles[section] || section;
+  if (section === 'suggestions') renderSuggestions();
+  if (section === 'users') renderUsers();
+}
+
+// ── Refresh ──
+async function refreshAll() {
+  await Promise.all([loadTrials(), loadSuggestions()]);
+  renderStats();
+  renderRecent();
+  renderSuggestions();
+  renderUsers();
+}
+
+async function loadTrials() {
+  const r = await api('/api/admin/trials');
+  if (r.ok) allTrials = r.data;
+}
+
+async function loadSuggestions() {
+  const r = await api('/api/admin/suggestions');
+  if (r.ok) allSuggestions = r.data;
+}
+
+// ── Stats ──
+function renderStats() {
+  const active = allTrials.filter(t => t.status === 'approved' && t.emailVerified).length;
+  const pending = allTrials.filter(t => !t.emailVerified || t.status === 'pending').length;
+  const sgPending = allSuggestions.filter(s => s.status === 'pending').length;
+  document.getElementById('st-total').textContent = allTrials.length;
+  document.getElementById('st-active').textContent = active;
+  document.getElementById('st-pending').textContent = pending;
+  document.getElementById('st-sg-pending').textContent = sgPending;
+}
+
+// ── Recent activity ──
+function renderRecent() {
+  const recent = [...allTrials]
+    .sort((a,b) => new Date(b.requestedAt) - new Date(a.requestedAt))
+    .slice(0, 8);
+  const el = document.getElementById('recent-list');
+  if (!recent.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>Sin actividad reciente</div>'; return; }
+  el.innerHTML = recent.map(t => `
+    <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--border)">
+      <div style="flex:1">
+        <div style="font-weight:600;font-size:13px">${esc(t.name)}</div>
+        <div style="font-size:11px;color:var(--muted)">${esc(t.email)} · ${fmtDate(t.requestedAt)}</div>
+      </div>
+      <span class="badge badge-${t.status === 'approved' && t.emailVerified ? 'approved' : !t.emailVerified ? 'read' : 'pending'}">${t.status === 'approved' && t.emailVerified ? '✓ Activo' : !t.emailVerified ? '✉ Sin verificar' : '⏳ Pendiente'}</span>
+    </div>`).join('');
+}
+
+// ── Suggestions ──
+function sgTab(status) {
+  currentSgTab = status;
+  ['pending','responded','all'].forEach(t => {
+    const key = t === 'all' ? '' : t;
+    document.getElementById('sgt-'+t).classList.toggle('active', key === status);
+  });
+  closeDetail();
+  renderSuggestions();
+}
+
+function renderSuggestions() {
+  const filtered = currentSgTab ? allSuggestions.filter(s => s.status === currentSgTab) : allSuggestions;
+  const sorted = [...filtered].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+  const el = document.getElementById('sg-list');
+  if (!sorted.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📭</div>No hay sugerencias en esta categoría.</div>'; return; }
+  el.innerHTML = sorted.map(s => `
+    <div class="sg-row${selectedSg?.id === s.id ? ' selected' : ''}" onclick="openDetail(${s.id})">
+      <div class="sg-meta">
+        <div class="sg-email">${esc(s.userEmail || s.userName || '—')}</div>
+        <div class="sg-preview">${esc(s.text)}</div>
+        <div class="sg-date">${fmtDate(s.createdAt)}</div>
+      </div>
+      <div class="sg-right">
+        <span class="badge badge-${s.status}">${sgStatusLabel(s.status)}</span>
+        ${s.category ? `<span class="badge badge-${s.category}">${sgCatLabel(s.category)}</span>` : ''}
+      </div>
+    </div>`).join('');
+}
+
+function sgStatusLabel(s) {
+  return { pending: '⏳ Pendiente', responded: '✓ Respondida', approved: '✅ Aprobada', rejected: '❌ Rechazada', read: '👁 Leída' }[s] || s;
+}
+function sgCatLabel(c) {
+  return { idea: '💡 Idea', bug: '🐛 Bug', compliment: '⭐ Cumplido', general: '💬 General' }[c] || c;
+}
+
+function openDetail(id) {
+  selectedSg = allSuggestions.find(s => s.id === id);
+  if (!selectedSg) return;
+  renderSuggestions();
+  const d = selectedSg;
+  document.getElementById('dp-name').textContent = d.userName || '(sin nombre)';
+  document.getElementById('dp-email').textContent = d.userEmail || '—';
+  const badges = document.getElementById('dp-badges');
+  badges.innerHTML = `<span class="badge badge-${d.status}">${sgStatusLabel(d.status)}</span>`;
+  if (d.category) badges.innerHTML += ` <span class="badge badge-${d.category}">${sgCatLabel(d.category)}</span>`;
+  document.getElementById('dp-msg').textContent = d.text;
+  const aiEl = document.getElementById('dp-ai');
+  if (d.aiReason || d.aiCategory) {
+    aiEl.style.display = 'block';
+    aiEl.innerHTML = `<strong>IA:</strong> ${d.aiIsOpportunity === true ? '✅ Oportunidad' : d.aiIsOpportunity === false ? '⚠ No prioritario' : '—'} · ${esc(d.aiReason || '')} · Categoría: <strong>${esc(d.aiCategory || '—')}</strong>`;
+  } else { aiEl.style.display = 'none'; }
+  document.getElementById('dp-reply').value = d.adminResponse || '';
+  document.getElementById('dp-replied').style.display = d.status === 'responded' ? 'block' : 'none';
+  document.getElementById('dp-response-section').style.display = d.status === 'responded' ? 'none' : 'block';
+  const panel = document.getElementById('sg-detail');
+  panel.classList.add('shown');
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  // Mark as read if pending
+  if (d.status === 'pending') markRead(d.id);
+}
+
+function closeDetail() {
+  selectedSg = null;
+  document.getElementById('sg-detail').classList.remove('shown');
+  renderSuggestions();
+}
+
+async function markRead(id) {
+  await api('/api/admin/suggestions/'+id, 'PATCH', { status: 'read' });
+  const sg = allSuggestions.find(s => s.id === id);
+  if (sg) sg.status = 'read';
+}
+
+async function sendReply() {
+  const reply = document.getElementById('dp-reply').value.trim();
+  if (!reply || !selectedSg) return;
+  const btn = event.target;
+  btn.innerHTML = '<span class="spin"></span> Enviando…';
+  btn.disabled = true;
+  const r = await api('/api/admin/suggestions/'+selectedSg.id, 'PATCH', { adminResponse: reply, status: 'responded' });
+  btn.textContent = 'Responder y notificar'; btn.disabled = false;
+  if (r.ok) {
+    const sg = allSuggestions.find(s => s.id === selectedSg.id);
+    if (sg) { sg.status = 'responded'; sg.adminResponse = reply; }
+    document.getElementById('dp-response-section').style.display = 'none';
+    document.getElementById('dp-replied').style.display = 'block';
+    toast('✓ Respuesta enviada', 'ok');
+  } else { toast('Error al enviar', 'err'); }
+}
+
+async function approveSg() {
+  if (!selectedSg) return;
+  const id = selectedSg.id;
+  const r = await api('/api/admin/trials/'+id+'/approve', 'POST');
+  // Also update suggestion status
+  await api('/api/admin/suggestions/'+id, 'PATCH', { status: 'approved' });
+  if (r.ok) { toast('✓ Aprobado — +5 análisis', 'ok'); await refreshAll(); closeDetail(); }
+  else toast('Error', 'err');
+}
+
+async function rejectSg() {
+  if (!selectedSg) return;
+  const notes = prompt('Motivo del rechazo (opcional):') ?? '';
+  const r = await api('/api/admin/suggestions/'+selectedSg.id, 'PATCH', { status: 'rejected' });
+  if (r.ok) { toast('Rechazado', 'ok'); await loadSuggestions(); renderSuggestions(); closeDetail(); }
+  else toast('Error', 'err');
+}
+
+// ── Users ──
+function renderUsers() {
+  const sorted = [...allTrials].sort((a,b) => new Date(b.requestedAt) - new Date(a.requestedAt));
+  const tbody = document.getElementById('users-tbody');
+  if (!sorted.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin usuarios</td></tr>'; return; }
+  tbody.innerHTML = sorted.map(t => {
+    const pct = t.analysesLimit > 0 ? Math.min(100, (t.analysesUsed/t.analysesLimit)*100) : 0;
+    const statusBadge = t.deviceMismatch ? '<span class="badge badge-rejected">⚠ Conflicto</span>'
+      : !t.emailVerified ? '<span class="badge badge-read">✉ Sin verificar</span>'
+      : t.status === 'approved' ? '<span class="badge badge-approved">✓ Activo</span>'
+      : t.status === 'rejected' ? '<span class="badge badge-rejected">✗ Rechazado</span>'
+      : '<span class="badge badge-pending">⏳ Pendiente</span>';
+    const actions = t.status !== 'approved'
+      ? `<button class="btn btn-approve btn-sm" onclick="approveUser(${t.id})">✓ Aprobar</button>`
+      : `<button class="btn btn-reject btn-sm" onclick="rejectUser(${t.id})">✗ Revocar</button>`;
+    return `<tr>
+      <td><div class="user-name">${esc(t.name)}</div><div class="user-email">${esc(t.email)}</div></td>
+      <td><div>${esc(t.country)}</div><div style="font-size:11px;color:var(--muted)">${esc(t.referralSource)}</div></td>
+      <td><div style="color:var(--accent);font-weight:700">${t.analysesUsed}/${t.analysesLimit}</div><div class="usage-bar-wrap"><div class="usage-bar" style="width:${pct}%"></div></div></td>
+      <td>${statusBadge}</td>
+      <td><div style="display:flex;gap:6px;flex-wrap:wrap">${actions}</div></td>
+    </tr>`;
+  }).join('');
+}
+
+async function approveUser(id) {
+  const r = await api('/api/admin/trials/'+id+'/approve', 'POST');
+  if (r.ok) { toast('✓ Usuario aprobado', 'ok'); await loadTrials(); renderUsers(); renderStats(); }
+  else toast('Error', 'err');
+}
+
+async function rejectUser(id) {
+  const notes = prompt('Motivo (opcional):') ?? '';
+  const r = await api('/api/admin/trials/'+id+'/reject', 'POST', { notes });
+  if (r.ok) { toast('Usuario rechazado', 'ok'); await loadTrials(); renderUsers(); renderStats(); }
+  else toast('Error', 'err');
+}
+
+// ── Email actions ──
+async function sendSummary() {
+  toast('Enviando resumen…', 'info');
+  const r = await api('/api/admin/send-summary', 'POST');
+  r.ok ? toast('📊 Resumen enviado', 'ok') : toast('Error al enviar', 'err');
+}
+async function sendWeekly() {
+  toast('Generando reporte…', 'info');
+  const r = await api('/api/admin/send-weekly', 'POST');
+  r.ok ? toast('📈 Reporte enviado', 'ok') : toast('Error al enviar', 'err');
+}
+
+// ── Helpers ──
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function fmtDate(iso) {
+  if (!iso) return '—';
+  return new Date(iso).toLocaleDateString('es', { day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function toast(msg, type='ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show ' + type;
+  clearTimeout(window._tt);
+  window._tt = setTimeout(() => el.className = 'toast', 2800);
+}
+
+// ── Init ──
+(async function init() {
+  if (!jwt) return;
+  const r = await api('/api/admin/trials');
+  if (r.ok) { allTrials = r.data; showApp(); await loadSuggestions(); renderStats(); renderRecent(); }
+  else { jwt = ''; localStorage.removeItem('fc_admin_jwt'); }
+})();
+</script>
+</body>
+</html>
