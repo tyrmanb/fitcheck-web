@@ -163,6 +163,9 @@ tr:hover td{background:rgba(255,255,255,.025)}
       <div class="nav-item" onclick="nav('users')" id="nav-users">
         <span class="nav-icon">👥</span><span class="nav-label">Usuarios</span>
       </div>
+      <div class="nav-item" onclick="nav('policies')" id="nav-policies">
+        <span class="nav-icon">📋</span><span class="nav-label">Políticas</span>
+      </div>
     </nav>
     <div class="sidebar-footer">
       <div class="sidebar-logout" onclick="logout()">← Cerrar sesión</div>
@@ -184,6 +187,7 @@ tr:hover td{background:rgba(255,255,255,.025)}
 
       <!-- ── DASHBOARD ── -->
       <div class="section active" id="sec-dashboard">
+        <div id="compliance-alerts" style="margin-bottom:16px"></div>
         <div class="stats" id="stats-row">
           <div class="stat-card"><div class="stat-n" id="st-total">—</div><div class="stat-l">Usuarios Trial</div></div>
           <div class="stat-card success"><div class="stat-n" id="st-active">—</div><div class="stat-l">Activos</div></div>
@@ -251,6 +255,33 @@ tr:hover td{background:rgba(255,255,255,.025)}
         </div>
       </div>
 
+
+      <!-- ── POLÍTICAS ── -->
+      <div class="section" id="sec-policies">
+        <div id="policies-alerts" style="margin-bottom:18px"></div>
+        <div class="card" id="policies-card">
+          <div style="padding:16px 18px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px">Versiones activas</div>
+          <div id="policies-list"><div class="empty"><div class="spin"></div></div></div>
+        </div>
+        <div style="margin-top:22px">
+          <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;margin-bottom:12px">Aceptaciones recientes</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Email</th>
+                  <th>Versión</th>
+                  <th>Referencia</th>
+                  <th>Dispositivo</th>
+                  <th>Fecha</th>
+                  <th>Trial</th>
+                </tr>
+              </thead>
+              <tbody id="acceptances-tbody"><tr><td colspan="6" style="text-align:center;padding:32px;color:var(--muted)"><div class="spin" style="margin:0 auto"></div></td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div><!-- /content -->
   </div><!-- /main -->
 </div><!-- /app -->
@@ -312,23 +343,25 @@ async function api(path, method='GET', body=null, auth=true) {
 
 // ── Navigation ──
 function nav(section) {
-  ['dashboard','suggestions','users'].forEach(s => {
+  ['dashboard','suggestions','users','policies'].forEach(s => {
     document.getElementById('sec-'+s).classList.toggle('active', s === section);
     document.getElementById('nav-'+s).classList.toggle('active', s === section);
   });
-  const titles = { dashboard: 'Dashboard', suggestions: 'Sugerencias', users: 'Usuarios Trial' };
+  const titles = { dashboard: 'Dashboard', suggestions: 'Sugerencias', users: 'Usuarios Trial', policies: 'Políticas' };
   document.getElementById('topbar-title').textContent = titles[section] || section;
   if (section === 'suggestions') renderSuggestions();
   if (section === 'users') renderUsers();
+  if (section === 'policies') { renderPolicies(); renderAcceptances(); }
 }
 
 // ── Refresh ──
 async function refreshAll() {
-  await Promise.all([loadTrials(), loadSuggestions()]);
+  await Promise.all([loadTrials(), loadSuggestions(), loadPolicies()]);
   renderStats();
   renderRecent();
   renderSuggestions();
   renderUsers();
+  renderComplianceAlerts();
 }
 
 async function loadTrials() {
@@ -549,6 +582,97 @@ function toast(msg, type='ok') {
   if (r.ok) { allTrials = r.data; showApp(); await loadSuggestions(); renderStats(); renderRecent(); }
   else { jwt = ''; localStorage.removeItem('fc_admin_jwt'); }
 })();
+
+// ── Policies ──
+let allPolicies = [];
+let allAcceptances = [];
+
+async function loadPolicies() {
+  const r = await api('/api/admin/policies');
+  if (r.ok) allPolicies = r.data;
+  const r2 = await api('/api/admin/privacy-acceptances?limit=50');
+  if (r2.ok) allAcceptances = r2.data;
+}
+
+function renderComplianceAlerts() {
+  const el = document.getElementById('compliance-alerts');
+  if (!el) return;
+  const now = Date.now();
+  const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+  const alerts = allPolicies.filter(p => p.alertStatus !== 'ok');
+  if (!alerts.length) { el.innerHTML = ''; return; }
+  el.innerHTML = alerts.map(p => {
+    const isOverdue = p.alertStatus === 'overdue';
+    const color = isOverdue ? 'var(--danger)' : 'var(--warn)';
+    const bg = isOverdue ? 'rgba(248,113,113,.08)' : 'rgba(251,191,36,.08)';
+    const border = isOverdue ? 'rgba(248,113,113,.25)' : 'rgba(251,191,36,.25)';
+    const icon = isOverdue ? '🚨' : '⚠️';
+    const label = p.type === 'privacy' ? 'Política de Privacidad' : 'Términos y Condiciones';
+    const date = new Date(p.nextReviewDate).toLocaleDateString('es', {day:'2-digit',month:'long',year:'numeric'});
+    const msg = isOverdue
+      ? `${icon} <strong>${label} (${esc(p.referenceCode)})</strong> — fecha de revisión <strong>vencida</strong> el ${date}. Actualiza urgente.`
+      : `${icon} <strong>${label} (${esc(p.referenceCode)})</strong> — vence revisión el <strong>${date}</strong>. Actualiza antes de esa fecha.`;
+    return `<div style="background:${bg};border:1px solid ${border};border-radius:10px;padding:12px 16px;font-size:13px;color:${color};margin-bottom:8px">${msg}</div>`;
+  }).join('');
+}
+
+function renderPolicies() {
+  const el = document.getElementById('policies-list');
+  if (!el) return;
+  if (!allPolicies.length) { el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>Sin políticas registradas</div>'; return; }
+  el.innerHTML = allPolicies.map(p => {
+    const statusColor = p.alertStatus === 'overdue' ? 'var(--danger)' : p.alertStatus === 'due_soon' ? 'var(--warn)' : 'var(--success)';
+    const statusLabel = p.alertStatus === 'overdue' ? '🚨 VENCIDA' : p.alertStatus === 'due_soon' ? '⚠️ PRÓXIMA A VENCER' : '✓ VIGENTE';
+    const typeLabel = p.type === 'privacy' ? '🔒 Privacidad' : '📄 Términos';
+    const effectiveDate = new Date(p.effectiveDate).toLocaleDateString('es', {day:'2-digit',month:'short',year:'numeric'});
+    const reviewDate = new Date(p.nextReviewDate).toLocaleDateString('es', {day:'2-digit',month:'short',year:'numeric'});
+    const count = allAcceptances.filter(a => a.referenceCode === p.referenceCode).length;
+    return `<div style="display:flex;align-items:center;gap:16px;padding:14px 18px;border-bottom:1px solid var(--border);flex-wrap:wrap">
+      <div style="flex:1;min-width:160px">
+        <div style="font-size:13px;font-weight:700;color:var(--text)">${typeLabel} · v${esc(p.version)}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:3px">Ref: <strong style="color:var(--accent)">${esc(p.referenceCode)}</strong></div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);min-width:120px">
+        <div>Vigente desde: ${effectiveDate}</div>
+        <div>Revisar antes: <span style="color:${statusColor}">${reviewDate}</span></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:11px;font-weight:700;color:${statusColor};margin-bottom:4px">${statusLabel}</div>
+        <div style="font-size:11px;color:var(--muted)">${count} aceptaciones</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Also render alerts in the policies section
+  const alertsEl = document.getElementById('policies-alerts');
+  if (alertsEl) {
+    const overdueOrSoon = allPolicies.filter(p => p.alertStatus !== 'ok');
+    alertsEl.innerHTML = overdueOrSoon.map(p => {
+      const isOverdue = p.alertStatus === 'overdue';
+      const color = isOverdue ? 'var(--danger)' : 'var(--warn)';
+      const bg = isOverdue ? 'rgba(248,113,113,.08)' : 'rgba(251,191,36,.08)';
+      const border = isOverdue ? 'rgba(248,113,113,.25)' : 'rgba(251,191,36,.25)';
+      const label = p.type === 'privacy' ? 'Política de Privacidad' : 'Términos y Condiciones';
+      const date = new Date(p.nextReviewDate).toLocaleDateString('es', {day:'2-digit',month:'long',year:'numeric'});
+      const msg = isOverdue ? `🚨 <strong>${label}</strong> — revisión VENCIDA el ${date}` : `⚠️ <strong>${label}</strong> — revisar antes del ${date}`;
+      return `<div style="background:${bg};border:1px solid ${border};border-radius:10px;padding:12px 16px;font-size:13px;color:${color}">${msg}</div>`;
+    }).join('');
+  }
+}
+
+function renderAcceptances() {
+  const tbody = document.getElementById('acceptances-tbody');
+  if (!tbody) return;
+  if (!allAcceptances.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty">Sin aceptaciones registradas</td></tr>'; return; }
+  tbody.innerHTML = allAcceptances.slice(0, 50).map(a => `<tr>
+    <td><div style="font-size:12px">${esc(a.userEmail || '—')}</div></td>
+    <td><span class="badge badge-approved">${esc(a.policyVersion)}</span></td>
+    <td><div style="font-size:11px;color:var(--accent);font-weight:600">${esc(a.referenceCode)}</div></td>
+    <td><div style="font-size:11px;color:var(--muted)">${esc(a.deviceInfo || '—')}</div></td>
+    <td><div style="font-size:11px">${fmtDate(a.acceptedAt)}</div></td>
+    <td><span class="badge ${a.trialCompleted ? 'badge-approved' : 'badge-read'}">${a.trialCompleted ? 'Sí' : 'No'}</span></td>
+  </tr>`).join('');
+}
 </script>
 </body>
 </html>
